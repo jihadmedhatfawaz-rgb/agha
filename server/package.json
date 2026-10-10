@@ -1,0 +1,9 @@
+{
+  "name": "whatsapp-resto",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Bot WhatsApp + menu 3D pour restaurant",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}

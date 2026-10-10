@@ -1,0 +1,9 @@
+{
+  "name": "agha-whatsapp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Agha : bot WhatsApp + menu en photos",
+  "scripts": { "start": "node server/server.js" },
+  "engines": { "node": ">=18" }
+}

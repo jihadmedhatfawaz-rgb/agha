@@ -1,0 +1,716 @@
+<title>Agha Menu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: phone-first menu opened from WhatsApp. A large real photo of the featured dish on top,
+   dishes below (photo, written composition, tap an ingredient to remove it), one bottom sheet to compose a dish, one to check out. Light look in the Agha menu colours (coral, royal blue, orange). */
+:root {
+  --ink: #15100c;
+  --ink-2: #1f1813;
+  --ink-3: #2a2019;
+  --line: #3a2d23;
+  --cream: #f7ecdc;
+  --muted: #b9a58f;
+  --palm: #f2a33a;
+  --palm-ink: #2a1503;
+  --leaf: #8fbf6a;
+  --chili: #e2553f;
+  --glow: rgba(242, 163, 58, .18);
+  --f-display: "Bricolage Grotesque", "Avenir Next Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-num: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 18px;
+  color-scheme: dark;
+}
+html, body { background: var(--ink); color: var(--cream); }
+body { font-family: var(--f-body); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible { outline: 2px solid var(--palm); outline-offset: 2px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 16px; padding-block: 0 120px; }
+
+/* Header */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 18px 6px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.mark { width: 38px; height: 38px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffd08a, var(--palm) 55%, #b4610f); display: grid; place-items: center; color: var(--palm-ink); font-family: var(--f-display); font-weight: 800; font-size: 18px; flex: none; }
+.brand h1 { font-family: var(--f-display); font-weight: 800; font-size: 20px; letter-spacing: -.01em; margin: 0; line-height: 1.1; }
+.brand p { margin: 0; color: var(--muted); font-size: 12.5px; }
+.open { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--leaf); border: 1px solid #34452a; padding: 5px 10px; border-radius: 99px; white-space: nowrap; }
+.open::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--leaf); box-shadow: 0 0 0 3px rgba(143,191,106,.2); }
+
+/* Hero stage */
+.hero { position: relative; margin-top: 10px; border-radius: 26px; overflow: hidden; background:
+  radial-gradient(60% 70% at 50% 62%, var(--glow), transparent 70%),
+  radial-gradient(120% 90% at 50% 0%, #2a1d13, var(--ink) 70%); border: 1px solid var(--line); }
+.hero-stage { height: clamp(300px, 56vw, 480px); position: relative; }
+.hero-stage img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.hero-info { position: absolute; left: 0; right: 0; bottom: 0; padding: 16px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; background: linear-gradient(to top, rgba(21,16,12,.92), rgba(21,16,12,0)); pointer-events: none; }
+.hero-info > * { pointer-events: auto; }
+.eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--palm); font-weight: 700; }
+.hero-info h2 { font-family: var(--f-display); font-weight: 800; font-size: clamp(26px, 6vw, 44px); line-height: 1; margin: 4px 0 0; letter-spacing: -.02em; text-wrap: balance; }
+.hint { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--muted); background: rgba(21,16,12,.6); padding: 4px 10px; border-radius: 99px; pointer-events: none; white-space: nowrap; }
+.btn { border: 0; border-radius: 99px; padding: 12px 18px; font-weight: 700; background: var(--palm); color: var(--palm-ink); display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; transition: transform .15s ease, filter .15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(.97); }
+.btn.ghost { background: var(--ink-3); color: var(--cream); }
+.btn.block { width: 100%; justify-content: center; padding: 15px 18px; font-size: 16px; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+/* Category chips */
+.cats { display: flex; gap: 8px; margin: 22px 0 14px; overflow-x: auto; scrollbar-width: none; }
+.cat { border: 1px solid var(--line); background: transparent; border-radius: 99px; padding: 8px 16px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.cat[aria-pressed="true"] { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+
+/* Dish grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.card { display: flex; flex-direction: column; text-align: left; background: var(--ink-2); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; cursor: pointer; transition: border-color .2s, transform .2s; }
+.card:hover { border-color: #5a4331; transform: translateY(-2px); }
+.cphoto { position: relative; aspect-ratio: 4 / 3; background: var(--ink-3); overflow: hidden; }
+.cphoto img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+.card:hover .cphoto img { transform: scale(1.04); }
+.cphoto .price { position: absolute; left: 10px; bottom: 10px; background: rgba(21,16,12,.82); padding: 4px 10px; border-radius: 99px; font-size: 14px; }
+.card-body { min-width: 0; display: grid; gap: 6px; padding: 12px 14px 14px; }
+.comp-title { margin-top: 2px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.mini { display: flex; flex-wrap: wrap; gap: 6px; }
+.mi { display: inline-flex; align-items: center; gap: 5px; border: 1px solid #4a3a2c; background: var(--ink-3); color: var(--cream); border-radius: 99px; padding: 4px 10px; font-size: 13px; font-weight: 600; }
+button.mi::after { content: "✕"; font-size: 10px; color: var(--chili); }
+button.mi:hover { border-color: var(--chili); }
+.mi.req { background: transparent; color: var(--muted); }
+.card h3 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 20px; line-height: 1.15; }
+.card p { margin: 0; color: var(--muted); font-size: 13px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.price { white-space: nowrap; font-family: var(--f-num); font-weight: 500; font-variant-numeric: tabular-nums; color: var(--palm); }
+.tag { white-space: nowrap; font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 99px; padding: 2px 8px; }
+.plus { width: 32px; height: 32px; border-radius: 50%; background: var(--ink-3); display: grid; place-items: center; font-size: 20px; line-height: 1; color: var(--palm); }
+
+/* Floating cart bar */
+.cartbar { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: center; z-index: 20; pointer-events: none; transform: translateY(130%); transition: transform .35s cubic-bezier(.2,.9,.25,1.1); }
+.cartbar.show { transform: none; }
+.cartbar button { pointer-events: auto; width: min(560px, 100%); display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 0; border-radius: 99px; padding: 14px 20px; background: var(--palm); color: var(--palm-ink); font-weight: 700; font-size: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+.count { background: var(--palm-ink); color: var(--palm); border-radius: 99px; padding: 1px 9px; font-family: var(--f-num); font-size: 13px; margin-right: 8px; }
+
+/* Sheets */
+.scrim { position: fixed; inset: 0; background: rgba(8,5,3,.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 30; opacity: 0; transition: opacity .25s; }
+.scrim.show { opacity: 1; }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 31; max-height: 94%; background: var(--ink-2); border-radius: 26px 26px 0 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; transform: translateY(102%); transition: transform .38s cubic-bezier(.2,.9,.25,1); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.sheet.show { transform: none; }
+.sheet-scroll { overflow-y: auto; overscroll-behavior: contain; padding-inline: 16px; padding-block: 0 16px; }
+.grab { width: 44px; height: 5px; border-radius: 9px; background: var(--line); margin: 10px auto 0; flex: none; }
+.x { position: absolute; top: 12px; right: 12px; z-index: 5; width: 38px; height: 38px; border-radius: 50%; border: 0; background: rgba(21,16,12,.7); font-size: 18px; color: var(--cream); }
+.sheet-foot { padding: 12px 16px; border-top: 1px solid var(--line); display: flex; gap: 12px; align-items: center; flex: none; }
+@media (min-width: 900px) {
+  .sheet { left: 50%; bottom: 50%; width: min(980px, 94vw); max-height: 88vh; border-radius: 26px; border: 1px solid var(--line); transform: translate(-50%, calc(50% + 40px)); opacity: 0; transition: transform .35s cubic-bezier(.2,.9,.25,1), opacity .25s; pointer-events: none; }
+  .sheet.show { transform: translate(-50%, 50%); opacity: 1; pointer-events: auto; }
+  .grab { display: none; }
+  #dishSheet .sheet-scroll { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; padding-top: 16px; }
+  #dishSheet .d-stage { position: sticky; top: 0; height: 520px; }
+  #cartSheet { width: min(620px, 94vw); }
+}
+
+/* Dish sheet */
+.d-stage { position: relative; height: clamp(280px, 50vh, 460px); margin-inline: -16px;
+  background: radial-gradient(60% 70% at 50% 60%, var(--glow), transparent 70%); }
+@media (min-width: 900px) { .d-stage { margin-inline: 0; border-radius: 20px; background: radial-gradient(60% 70% at 50% 60%, var(--glow), transparent 70%), var(--ink); } }
+.d-head { display: grid; gap: 6px; padding-top: 4px; }
+.d-head h2 { font-family: var(--f-display); font-weight: 800; font-size: 30px; line-height: 1.05; margin: 0; letter-spacing: -.02em; text-wrap: balance; }
+.d-head p { margin: 0; color: var(--muted); max-width: 60ch; }
+.sec { margin-top: 22px; }
+.sec-title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.sec-title h4 { margin: 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.sec-title span { font-size: 12px; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.ing { display: inline-flex; align-items: center; gap: 8px; border-radius: 99px; padding: 9px 14px 9px 10px; border: 1px solid #4a3a2c; background: var(--ink-3); font-weight: 600; transition: background .2s, border-color .2s, color .2s; }
+.ing .dot { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; background: var(--leaf); color: #142009; transition: background .2s; flex: none; }
+.ing[aria-pressed="false"] { background: transparent; color: var(--muted); border-style: dashed; }
+.ing[aria-pressed="false"] .label { text-decoration: line-through; text-decoration-color: var(--chili); text-decoration-thickness: 2px; }
+.ing[aria-pressed="false"] .dot { background: var(--chili); color: #2a0b05; }
+.ing[disabled] { cursor: default; opacity: .8; }
+.ing[disabled] .dot { background: var(--line); color: var(--muted); }
+.extra { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.extra:last-child { border-bottom: 0; }
+.extra b { font-weight: 600; }
+.extra .price { font-size: 13px; }
+.step { display: inline-flex; align-items: center; gap: 4px; background: var(--ink-3); border-radius: 99px; padding: 3px; }
+.step button { width: 32px; height: 32px; border-radius: 50%; border: 0; background: transparent; font-size: 18px; line-height: 1; }
+.step button:hover { background: var(--line); }
+.step output { min-width: 22px; text-align: center; font-family: var(--f-num); font-variant-numeric: tabular-nums; }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 13px; color: var(--muted); font-weight: 600; }
+.field input, .field textarea { width: 100%; background: var(--ink); border: 1px solid var(--line); color: var(--cream); border-radius: 12px; padding: 12px 14px; font: inherit; resize: vertical; }
+.field input::placeholder, .field textarea::placeholder { color: #7c6b5a; }
+
+/* Cart */
+.c-head { padding-top: 14px; }
+.c-head h2 { font-family: var(--f-display); font-weight: 800; font-size: 28px; margin: 0; }
+.line { display: grid; grid-template-columns: 56px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.line img { width: 56px; height: 56px; border-radius: 12px; background: var(--ink); object-fit: cover; }
+.line-body { min-width: 0; }
+.line-body b { display: block; }
+.mods { font-size: 12.5px; color: var(--muted); }
+.mods .minus { color: var(--chili); }
+.mods .add { color: var(--leaf); }
+.line-right { display: grid; justify-items: end; gap: 6px; }
+.totals { display: grid; gap: 6px; padding: 14px 0 4px; }
+.totals div { display: flex; justify-content: space-between; }
+.totals .grand { font-size: 18px; font-weight: 700; padding-top: 6px; border-top: 1px dashed var(--line); margin-top: 4px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--ink); padding: 4px; border-radius: 14px; border: 1px solid var(--line); }
+.seg button { border: 0; background: transparent; border-radius: 10px; padding: 10px; font-weight: 600; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--ink-3); color: var(--cream); }
+.form { display: grid; gap: 14px; margin-top: 18px; }
+.err { color: var(--chili); font-size: 13px; min-height: 1em; }
+.empty { text-align: center; color: var(--muted); padding: 30px 0; }
+
+/* Done */
+.done { text-align: center; padding: 26px 4px 6px; display: grid; gap: 12px; justify-items: center; }
+.done .ok { width: 76px; height: 76px; border-radius: 50%; background: var(--leaf); color: #142009; display: grid; place-items: center; font-size: 38px; animation: pop .6s cubic-bezier(.2,1.6,.4,1); }
+.done h2 { font-family: var(--f-display); font-weight: 800; font-size: 28px; margin: 0; }
+.done p { margin: 0; color: var(--muted); max-width: 42ch; }
+.receipt { width: 100%; text-align: left; white-space: pre-wrap; font-family: var(--f-num); font-size: 12.5px; background: var(--ink); border: 1px dashed var(--line); border-radius: 12px; padding: 14px; color: var(--cream); overflow-x: auto; }
+.demo { font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; text-align: left; }
+@keyframes pop { from { transform: scale(.3); opacity: 0; } to { transform: none; opacity: 1; } }
+.toast { position: fixed; left: 50%; top: calc(14px + env(safe-area-inset-top, 0px)); transform: translate(-50%, -150%); background: var(--cream); color: var(--ink); padding: 10px 16px; border-radius: 99px; font-weight: 700; z-index: 50; transition: transform .35s cubic-bezier(.2,.9,.25,1.2); white-space: nowrap; }
+.toast.show { transform: translate(-50%, 0); }
+.notice { margin: 14px 0 0; font-size: 12.5px; color: var(--muted); border: 1px dashed var(--line); border-radius: 12px; padding: 8px 12px; }
+.foot-note { color: var(--muted); font-size: 12px; text-align: center; margin-top: 30px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+
+/* Search + sticky category bar */
+.bar { position: sticky; top: 0; z-index: 10; background: linear-gradient(var(--ink) 82%, rgba(21,16,12,0)); padding-block: 12px 6px; margin-inline: -16px; padding-inline: 16px; }
+.search { position: relative; }
+.search input { width: 100%; background: var(--ink-2); border: 1px solid var(--line); color: var(--cream); border-radius: 99px; padding: 11px 16px 11px 40px; font: inherit; }
+.search input::placeholder { color: #8a7764; }
+.search svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--muted); pointer-events: none; }
+.bar .cats { margin: 10px 0 4px; }
+.catnote { margin: 4px 0 12px; font-size: 13px; color: var(--muted); }
+.catnote:empty { display: none; }
+.results { font-size: 13px; color: var(--muted); margin: 6px 0 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge { white-space: nowrap; font-size: 11px; font-weight: 700; border-radius: 99px; padding: 2px 8px; }
+.badge.pop { background: rgba(242,163,58,.16); color: var(--palm); }
+.badge.veg { background: rgba(143,191,106,.14); color: var(--leaf); }
+.card-cat { font-size: 11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+.sizes { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px; }
+.size { border: 1px solid #4a3a2c; background: var(--ink-3); border-radius: 14px; padding: 10px 12px; text-align: left; display: grid; gap: 2px; transition: border-color .2s, background .2s; }
+.size b { font-weight: 600; font-size: 14px; line-height: 1.2; }
+.size .price { font-size: 13px; }
+.size[aria-pressed="true"] { border-color: var(--palm); background: rgba(242,163,58,.12); }
+.viewtog { position: absolute; top: 12px; left: 16px; z-index: 3; display: flex; gap: 4px; background: rgba(21,16,12,.72); padding: 4px; border-radius: 99px; }
+.viewtog button { border: 0; background: transparent; color: var(--muted); border-radius: 99px; padding: 6px 12px; font-size: 13px; font-weight: 700; }
+.viewtog button[aria-pressed="true"] { background: var(--cream); color: var(--ink); }
+.d-photo { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; object-fit: cover; background: var(--ink); }
+@media (min-width: 900px) { .d-photo { border-radius: 20px; } }
+/* vraie photo du plat */
+.dpic { position: absolute; inset: 0; z-index: 2; background: var(--ink-3); }
+@media (min-width: 900px) { .dpic { border-radius: 20px; overflow: hidden; } }
+.dpic img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.dpic .credit { position: absolute; right: 10px; bottom: 8px; font-size: 10px; color: rgba(255,248,235,.75); background: rgba(21,16,12,.55); padding: 2px 8px; border-radius: 99px; max-width: 75%; text-align: right; line-height: 1.3; }
+.dpic .credit:empty { display: none; }
+.dpic .credit a { color: inherit; }
+.indic { font-size: 12px; color: var(--muted); font-style: italic; }
+
+/* ===== Thème clair « Agha » : couleurs de la carte (corail, bleu roi, orange), style appli de livraison ===== */
+:root {
+  --ink: #f7f4ef; --ink-2: #ffffff; --ink-3: #f2ede6; --line: #e8e0d5;
+  --cream: #1c1917; --muted: #6b6259; --palm: #e8505b; --palm-ink: #ffffff;
+  --blue: #1f4fb3; --orange: #f39a2c; --leaf: #23854a; --chili: #d63b3b;
+  --glow: rgba(232,80,91,.10);
+  --f-display: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-body: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-num: "Plus Jakarta Sans", system-ui, sans-serif;
+  --r: 16px; --shadow: 0 1px 2px rgba(28,25,23,.06), 0 6px 20px rgba(28,25,23,.07);
+  color-scheme: light;
+}
+body { font-size: 15px; }
+.price { font-weight: 700; color: var(--cream); }
+/* en-tête : bandeau bleu roi */
+.top { margin-inline: -16px; padding: 14px 16px; background: var(--blue); color: #fff; }
+.brand h1 { color: #fff; font-size: 21px; letter-spacing: 0; }
+.brand p { color: rgba(255,255,255,.78); }
+.mark { background: #fff; color: var(--palm); box-shadow: 0 0 0 3px rgba(255,255,255,.25); }
+.open { color: #fff; border-color: rgba(255,255,255,.35); background: rgba(255,255,255,.1); }
+.open::before { background: #5fe08a; box-shadow: 0 0 0 3px rgba(95,224,138,.25); }
+@media (min-width: 1112px) { .top { margin-inline: 0; border-radius: 0 0 18px 18px; } }
+/* plat à la une */
+.hero { margin-top: 16px; border: 0; border-radius: 20px; box-shadow: var(--shadow); background: var(--ink-3); }
+.hero-info { padding: 20px; background: linear-gradient(to top, rgba(10,8,6,.78), rgba(10,8,6,.35) 55%, rgba(10,8,6,0)); }
+.hero-info h2 { color: #fff; letter-spacing: -.01em; }
+.hero .eyebrow { color: #ffd29a; }
+.eyebrow { color: var(--palm); }
+.btn { background: var(--palm); color: #fff; box-shadow: 0 6px 16px rgba(232,80,91,.28); }
+.btn.ghost { background: var(--ink-3); color: var(--cream); box-shadow: none; }
+/* recherche + catégories */
+.bar { background: linear-gradient(var(--ink) 85%, rgba(247,244,239,0)); }
+.search input { background: #fff; border-color: var(--line); color: var(--cream); box-shadow: 0 1px 2px rgba(28,25,23,.04); }
+.search input::placeholder { color: #9a9087; }
+.cat { background: #fff; border-color: var(--line); color: var(--cream); font-weight: 600; }
+.cat[aria-pressed="true"] { background: var(--palm); border-color: var(--palm); color: #fff; }
+.catnote { color: var(--muted); }
+/* cartes plats */
+.grid { gap: 16px; }
+.card { background: #fff; border: 0; box-shadow: var(--shadow); }
+.card:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(28,25,23,.06), 0 14px 30px rgba(28,25,23,.12); }
+.cphoto .price { background: #fff; color: var(--cream); box-shadow: 0 2px 8px rgba(0,0,0,.18); font-size: 13.5px; }
+.card h3 { font-weight: 700; font-size: 18px; letter-spacing: -.01em; }
+.comp-title { color: var(--muted); font-size: 10.5px; }
+.mi { background: var(--ink-3); border-color: transparent; color: var(--cream); font-weight: 600; }
+button.mi:hover { background: #fde8e9; border-color: transparent; color: var(--palm); }
+.mi.req { background: transparent; border-color: var(--line); color: var(--muted); }
+.card-body { flex: 1; display: flex; flex-direction: column; }
+.card-foot { border-top: 1px solid var(--line); padding-top: 10px; margin-top: auto; }
+.card-body > .card-foot { margin-top: auto; }
+.card-foot .price { color: var(--muted); font-weight: 600; font-size: 13px; }
+.plus { background: var(--palm); color: #fff; font-weight: 700; }
+.badge.pop { background: #fff1df; color: #b35f00; }
+.badge.veg { background: #e6f4ea; color: var(--leaf); }
+/* panier flottant */
+.cartbar button { background: var(--palm); color: #fff; box-shadow: 0 10px 30px rgba(232,80,91,.35); }
+.count { background: #fff; color: var(--palm); font-weight: 700; }
+/* fiches */
+.scrim { background: rgba(20,16,12,.45); }
+.sheet { background: #fff; border-top: 0; box-shadow: 0 -10px 40px rgba(0,0,0,.15); }
+.x { background: #fff; color: var(--cream); box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+.viewtog { background: rgba(255,255,255,.92); box-shadow: 0 2px 10px rgba(0,0,0,.15); }
+.viewtog button { color: var(--muted); }
+.viewtog button[aria-pressed="true"] { background: var(--palm); color: #fff; }
+.dpic .credit { background: rgba(0,0,0,.45); color: #fff; }
+.d-head h2 { font-weight: 800; letter-spacing: -.02em; }
+.d-head .price { color: var(--palm); font-size: 20px; }
+.sec-title h4 { color: var(--cream); letter-spacing: .08em; }
+.size { background: #fff; border-color: var(--line); }
+.size[aria-pressed="true"] { border-color: var(--palm); background: #fff3f3; box-shadow: inset 0 0 0 1px var(--palm); }
+.size .price { color: var(--muted); }
+.ing { background: #fff; border-color: var(--line); color: var(--cream); }
+.ing .dot { background: var(--leaf); color: #fff; }
+.ing[aria-pressed="false"] { background: #fff6f6; color: var(--muted); border-color: #f2c4c4; }
+.ing[aria-pressed="false"] .dot { background: var(--chili); color: #fff; }
+.ing[disabled] { opacity: 1; background: var(--ink-3); border-color: transparent; }
+.ing[disabled] .dot { background: #d8d0c6; color: #fff; }
+.step { background: var(--ink-3); }
+.step button:hover { background: var(--line); }
+.field input, .field textarea { background: #fff; border-color: var(--line); color: var(--cream); }
+.field input::placeholder, .field textarea::placeholder { color: #a39a90; }
+.field input:focus, .field textarea:focus { border-color: var(--palm); outline: none; box-shadow: 0 0 0 3px rgba(232,80,91,.15); }
+.sheet-foot { background: #fff; }
+.extra .price { color: var(--muted); }
+/* panier */
+.line img { background: var(--ink-3); }
+.seg { background: var(--ink-3); border-color: transparent; }
+.seg button[aria-pressed="true"] { background: #fff; color: var(--cream); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.totals .grand .price, .totals .grand { color: var(--cream); }
+.done .ok { color: #fff; }
+.receipt { background: var(--ink); color: var(--cream); }
+.toast { background: var(--cream); color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible, .card:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* ===== Couleurs de la carte imprimée Agha : bleu roi, rouge vif, orange, titres blancs en capitales ===== */
+:root { --blue: #2446a8; --red: #e5343b; --orange: #f2922e; --palm: #e5343b; --ink: #2446a8;
+  --f-head: "Archivo Black", "Arial Black", system-ui, sans-serif; }
+html, body { background: var(--blue); }
+.top { background: var(--red); }
+.top .mark { color: var(--red); }
+.brand h1 { font-family: var(--f-head); font-weight: 400; text-transform: uppercase; letter-spacing: .02em; font-size: 22px; }
+.hero { box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+.hero-info h2, .d-head h2, .c-head h2, .done h2 { font-family: var(--f-head); font-weight: 400; text-transform: uppercase; letter-spacing: .01em; }
+.hero .eyebrow { color: var(--orange); }
+.btn { background: var(--red); box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+.bar { background: linear-gradient(var(--blue) 85%, rgba(36,70,168,0)); }
+.search input { border-color: transparent; }
+.cat { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.35); color: #fff; }
+.cat[aria-pressed="true"] { background: var(--red); border-color: #fff; color: #fff; box-shadow: 0 0 0 1px #fff inset; }
+.catband { margin: 8px 0 16px; padding: 18px 18px 16px; border-radius: 16px; background: var(--red); color: #fff; box-shadow: 0 8px 22px rgba(0,0,0,.2); }
+.catband[data-c="1"] { background: var(--orange); }
+.catband[data-c="2"] { background: #fff; color: var(--blue); }
+.catband[data-c="q"] { background: rgba(255,255,255,.12); }
+.catband h2 { margin: 0; font-family: var(--f-head); font-weight: 400; font-size: clamp(30px, 8vw, 44px); line-height: 1; text-transform: uppercase; letter-spacing: .02em; text-shadow: 2px 2px 0 rgba(0,0,0,.18); }
+.catband[data-c="2"] h2 { text-shadow: none; }
+.catband h2::after { content: ""; display: block; margin-top: 10px; border-top: 2px dotted currentColor; opacity: .7; }
+.catband .catnote { margin: 10px 0 0; color: inherit; font-size: 13px; font-weight: 600; opacity: .95; }
+.catband .results { color: inherit; margin: 0; }
+.card { box-shadow: 0 8px 22px rgba(0,0,0,.22); }
+.card h3 { font-family: var(--f-head); font-weight: 400; text-transform: uppercase; font-size: 18px; letter-spacing: .01em; color: var(--blue); }
+.cphoto .price { background: var(--orange); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+.plus { background: var(--red); }
+button.mi:hover { background: #fde4e5; color: var(--red); }
+.card-cat { color: var(--red); font-weight: 700; }
+.foot-note { color: rgba(255,255,255,.8); }
+.notice { color: #fff; border-color: rgba(255,255,255,.4); }
+.cartbar button { background: var(--red); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.count { color: var(--red); }
+.eyebrow { color: var(--red); }
+.d-head .price { color: var(--red); }
+.size[aria-pressed="true"] { border-color: var(--red); background: #fff1f1; box-shadow: inset 0 0 0 1px var(--red); }
+.viewtog button[aria-pressed="true"] { background: var(--red); }
+.sec-title h4 { color: var(--blue); }
+.receipt { background: #f7f4ef; }
+.toast { background: var(--blue); }
+.top .mark.logo { width: 64px; height: 44px; border-radius: 0; background: none; box-shadow: none; }
+.top .mark.logo img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,.25)); }
+.promo { margin-top: 16px; border-radius: 20px; overflow: hidden; background: var(--blue); box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+.promo img { display: block; width: 100%; height: auto; max-height: 560px; object-fit: contain; margin: 0 auto; }
+.promo.link { cursor: pointer; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="mark logo" id="mark"><img src="img/agha-logo.png" alt="Agha"></div>
+      <div><h1 id="rName">Agha</h1><p id="rTag">Restaurant libanais</p></div>
+    </div>
+    <span class="open" id="rOpen">Livraison · Abidjan</span>
+  </header>
+
+  <section class="promo" id="promo" aria-label="Offre du moment" hidden>
+    <img id="promoImg" alt="Offre du moment">
+  </section>
+
+  <p class="notice" id="rNotice" hidden></p>
+  <div class="bar">
+    <label class="search"><span class="sr" hidden>Rechercher</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" id="q" placeholder="Rechercher : shawarma, falafel, pizza…" autocomplete="off" aria-label="Rechercher un plat">
+    </label>
+    <nav class="cats" id="cats" aria-label="Catégories"></nav>
+  </div>
+  <div class="catband" id="catBand"><h2 id="catTitle"></h2><p class="catnote" id="catNote"></p></div>
+  <div class="grid" id="grid"></div>
+  <p class="foot-note" id="footNote">Touchez un ingrédient pour le retirer de votre plat, ou touchez le plat pour choisir la taille et ajouter un supplément.</p>
+</div>
+
+<div class="cartbar" id="cartbar"><button type="button" id="openCart"><span><span class="count" id="cartCount">0</span>Voir le panier</span><span class="price" style="color:inherit" id="cartTotal">0 F</span></button></div>
+
+<div class="scrim" id="scrim" hidden></div>
+
+<section class="sheet" id="dishSheet" role="dialog" aria-modal="true" aria-labelledby="dName" hidden>
+  <div class="grab"></div>
+  <button class="x" type="button" data-close aria-label="Fermer">✕</button>
+  <div class="sheet-scroll">
+    <div class="d-stage" id="dStage">
+      <div class="viewtog" id="dView" hidden><button type="button" data-v="photo" aria-pressed="true">Photo</button><button type="button" data-v="carte" aria-pressed="false">Carte Agha</button></div>
+      <div class="dpic" id="dPic"><img id="dPicImg" alt=""><span class="credit" id="dCredit"></span></div>
+      <img class="d-photo" id="dPhoto" alt="" hidden>
+    </div>
+    <div>
+      <div class="d-head">
+        <div class="eyebrow" id="dTag"></div>
+        <h2 id="dName"></h2>
+        <div class="badges" id="dBadges"></div>
+        <p id="dDesc"></p>
+        <div class="price" id="dBase"></div>
+      </div>
+      <div class="sec" id="dSizesSec">
+        <div class="sec-title"><h4>Taille</h4></div>
+        <div class="sizes" id="dSizes" role="group" aria-label="Taille"></div>
+      </div>
+      <div class="sec" id="dIngsSec">
+        <div class="sec-title"><h4>Dans votre plat</h4><span id="dIngHint">Touchez pour retirer</span></div>
+        <div class="chips" id="dIngs"></div>
+        <p class="indic" id="dIndic" hidden>Composition indicative : la carte ne détaille pas cette recette.</p>
+      </div>
+      <div class="sec" id="dExtrasSec">
+        <div class="sec-title"><h4>Suppléments</h4></div>
+        <div id="dExtras"></div>
+      </div>
+      <div class="sec field">
+        <label for="dNote">Une précision pour la cuisine ?</label>
+        <input id="dNote" type="text" maxlength="140" placeholder="Ex. bien pimenté, sauce à part…">
+      </div>
+    </div>
+  </div>
+  <div class="sheet-foot">
+    <div class="step" aria-label="Quantité"><button type="button" id="qMinus" aria-label="Moins">−</button><output id="qVal">1</output><button type="button" id="qPlus" aria-label="Plus">+</button></div>
+    <button class="btn block" type="button" id="addBtn">Ajouter</button>
+  </div>
+</section>
+
+<section class="sheet" id="cartSheet" role="dialog" aria-modal="true" aria-labelledby="cTitle" hidden>
+  <div class="grab"></div>
+  <button class="x" type="button" data-close aria-label="Fermer">✕</button>
+  <div class="sheet-scroll" id="cartBody"></div>
+  <div class="sheet-foot" id="cartFoot"></div>
+</section>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(async function () {
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = n => Math.round(n).toLocaleString("fr-FR").replace(/[  ]/g, " ") + " F";
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const TOKEN = new URLSearchParams(location.search).get("t");
+
+/* ---------- données ---------- */
+let MENU;
+try { MENU = await (await fetch("menu.json", { cache: "no-store" })).json(); }
+catch (e) { document.body.insertAdjacentHTML("beforeend", '<p class="empty">Le menu n\'a pas pu être chargé. Réessayez dans un instant.</p>'); return; }
+const R = MENU.restaurant;
+const DISH = Object.fromEntries(MENU.dishes.map(d => [d.id, d]));
+$("#rName").textContent = R.name; $("#rTag").textContent = R.tagline; if (!$("#mark img")) $("#mark").textContent = R.name.replace(/^chez\s+/i, "").charAt(0);
+$("#rOpen").textContent = "Livraison · " + R.city; document.title = R.name + " Menu";
+if (R.notice) { $("#rNotice").textContent = R.notice; $("#rNotice").hidden = false; }
+
+
+/* ---------- état ---------- */
+const cart = [];
+let cat = MENU.categories[0].id, query = "";
+let sel = null; // { dish, size, removed:Set, extras:{}, qty, note, editing? }
+const sizeOf = (d, id) => d.sizes.find(s => s.id === id) || d.sizes[0];
+const exPrice = (e, sizeId) => typeof e.price === "number" ? e.price : (e.price[sizeId] != null ? e.price[sizeId] : Object.values(e.price)[0]);
+const priceOf = (d, size, extras) => sizeOf(d, size).price + (d.extras || []).reduce((s, e) => s + (extras[e.id] || 0) * exPrice(e, sizeOf(d, size).id), 0);
+const minPrice = d => Math.min(...d.sizes.map(s => s.price));
+const labelOf = (d, size) => d.name + (d.sizes.length > 1 && sizeOf(d, size).label ? " · " + sizeOf(d, size).label : "");
+const newSel = d => ({ dish: d, size: d.sizes[0].id, removed: new Set(), extras: {}, qty: 1, note: "" });
+const imgOf = d => (d.pic && d.pic.src) || d.photo || "";
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const CAT = Object.fromEntries(MENU.categories.map(c => [c.id, c]));
+const norm = s => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const badges = d => (d.tags || []).map(t => t === "populaire" ? '<span class="badge pop">★ Populaire</span>' : t === "vegetarien" ? '<span class="badge veg">Végétarien</span>' : "").join("");
+
+/* bannière publicitaire : image envoyée par le responsable au bot (promo.json), sinon celle de menu.json */
+async function showPromo() {
+  let p = null;
+  try { const r = await fetch("promo.json", { cache: "no-store" }); if (r.ok) p = await r.json(); } catch (e) {}
+  if (!p || !p.img) p = MENU.promo || null;
+  if (!p || !p.img) return;
+  $("#promoImg").src = p.img; if (p.alt) $("#promoImg").alt = p.alt;
+  $("#promo").hidden = false;
+  const d = p.dish && DISH[p.dish];
+  if (d) { $("#promo").classList.add("link"); $("#promo").onclick = () => openDish(d); }
+}
+
+/* catégories, recherche, grille */
+function renderCats() {
+  $("#cats").innerHTML = MENU.categories.map(c => `<button class="cat" type="button" data-cat="${esc(c.id)}" aria-pressed="${!query && c.id === cat}">${esc(c.name)}</button>`).join("");
+}
+$("#cats").onclick = e => {
+  const b = e.target.closest("[data-cat]"); if (!b) return;
+  cat = b.dataset.cat; query = ""; $("#q").value = ""; renderCats(); renderGrid();
+  b.scrollIntoView({ block: "nearest", inline: "center", behavior: reduce ? "auto" : "smooth" });
+  const top = $("#catNote").getBoundingClientRect().top + scrollY - 130; if (scrollY > top) scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
+};
+$("#q").addEventListener("input", e => { query = e.target.value.trim(); renderCats(); renderGrid(); });
+function matches(d, q) { const hay = norm([d.name, d.desc, (CAT[d.category] || {}).name, ...d.ingredients.map(i => i.name)].join(" ")); return norm(q).split(/\s+/).every(w => hay.includes(w)); }
+function card(d, withCat) {
+  const img = imgOf(d), ings = d.ingredients || [];
+  return `<article class="card" data-dish="${esc(d.id)}" tabindex="0" role="button" aria-label="${esc(d.name)}">
+    <div class="cphoto">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : ""}<span class="price">${d.sizes.length > 1 ? "dès " : ""}${fmt(minPrice(d))}</span></div>
+    <div class="card-body">
+      ${withCat ? `<span class="card-cat">${esc((CAT[d.category] || {}).name || "")}</span>` : ""}
+      <h3>${esc(d.name)}</h3>
+      ${d.tags ? `<span class="badges">${badges(d)}</span>` : ""}
+      ${d.desc ? `<p>${esc(d.desc)}</p>` : ""}
+      ${ings.length ? `<div class="comp-title">${ings.some(i => !i.required) ? "Composition · touchez pour retirer" : "Composition"}</div>
+      <div class="mini">${ings.map(i => i.required ? `<span class="mi req">${esc(cap(i.name))}</span>` : `<button class="mi" type="button" data-ing="${esc(i.id)}" aria-label="Retirer ${esc(i.name)}">${esc(cap(i.name))}</button>`).join("")}</div>` : ""}
+      <span class="card-foot"><span class="price">${d.sizes.length > 1 ? d.sizes.length + " tailles" : fmt(minPrice(d))}</span><span class="plus" aria-hidden="true">+</span></span>
+    </div>
+  </article>`;
+}
+function renderGrid() {
+  let list;
+  if (query) {
+    list = MENU.dishes.filter(d => matches(d, query));
+    $("#catBand").dataset.c = "q"; $("#catTitle").textContent = "Recherche";
+    $("#catNote").innerHTML = `<span class="results">${list.length ? list.length + " résultat" + (list.length > 1 ? "s" : "") + " pour « " + esc(query) + " »" : "Aucun plat trouvé pour « " + esc(query) + " »."}</span>`;
+  } else {
+    list = MENU.dishes.filter(d => d.category === cat);
+    $("#catBand").dataset.c = MENU.categories.findIndex(c => c.id === cat) % 3; $("#catTitle").textContent = (CAT[cat] || {}).name || "";
+    $("#catNote").textContent = (CAT[cat] || {}).note || "";
+  }
+  $("#grid").innerHTML = list.map(d => card(d, !!query)).join("");
+}
+$("#grid").onclick = e => {
+  const c = e.target.closest("[data-dish]"); if (!c) return;
+  const d = DISH[c.dataset.dish], ing = e.target.closest("[data-ing]");
+  openDish(d);
+  if (ing) { sel.removed.add(ing.dataset.ing); renderIngs(); toast(cap(d.ingredients.find(i => i.id === ing.dataset.ing).name) + " retiré"); }
+};
+$("#grid").onkeydown = e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches(".card")) { e.preventDefault(); openDish(DISH[e.target.dataset.dish]); } };
+
+/* feuilles */
+let openSheet = null;
+function show(sheet) {
+  openSheet = sheet; const s = $("#scrim"); s.hidden = false; sheet.hidden = false;
+  requestAnimationFrame(() => { s.classList.add("show"); sheet.classList.add("show"); });
+  document.body.style.overflow = "hidden";
+}
+function hide() {
+  if (!openSheet) return; const sheet = openSheet; openSheet = null;
+  sheet.classList.remove("show"); $("#scrim").classList.remove("show");
+  setTimeout(() => { sheet.hidden = true; if (!openSheet) $("#scrim").hidden = true; }, 380);
+  document.body.style.overflow = "";
+}
+$("#scrim").onclick = hide;
+document.querySelectorAll("[data-close]").forEach(b => b.onclick = hide);
+addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+
+/* fiche plat */
+function setView(v) {
+  const d = sel.dish;
+  if (v === "photo" && !d.pic) v = "carte";
+  if (v === "carte" && !d.photo) v = "photo";
+  $("#dPic").hidden = v !== "photo"; $("#dPhoto").hidden = v !== "carte";
+  document.querySelectorAll("#dView [data-v]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v)));
+}
+$("#dView").onclick = e => { const b = e.target.closest("[data-v]"); if (b) setView(b.dataset.v); };
+function openDish(d, existing) {
+  sel = existing || newSel(d);
+  $("#dTag").textContent = (CAT[d.category] || {}).name || ""; $("#dName").textContent = d.name;
+  $("#dBadges").innerHTML = badges(d); $("#dDesc").textContent = d.desc || ""; $("#dDesc").hidden = !d.desc;
+  $("#dNote").value = sel.note; $("#qVal").textContent = sel.qty;
+  $("#dView").hidden = !(d.pic && d.photo && d.pic.src !== d.photo); if (d.photo) $("#dPhoto").src = d.photo;
+  $("#dPicImg").src = d.pic ? d.pic.src : ""; $("#dPicImg").alt = d.name;
+  $("#dCredit").innerHTML = d.pic && d.pic.by ? `Photo ${d.pic.link ? `<a href="${esc(d.pic.link)}" target="_blank" rel="noopener">${esc(d.pic.by)}</a>` : esc(d.pic.by)}${d.pic.lic ? " · " + esc(d.pic.lic) : ""}` : "";
+  setView(d.pic ? "photo" : "carte");
+  $("#dStage").hidden = !imgOf(d);
+  renderSizes(); renderIngs(); renderExtras(); updateAdd();
+  show($("#dishSheet"));
+  $("#dishSheet .sheet-scroll").scrollTop = 0;
+}
+function renderSizes() {
+  const d = sel.dish, many = d.sizes.length > 1;
+  $("#dSizesSec").hidden = !many;
+  $("#dBase").textContent = fmt(sizeOf(d, sel.size).price);
+  if (many) $("#dSizes").innerHTML = d.sizes.map(s => `<button class="size" type="button" data-size="${esc(s.id)}" aria-pressed="${s.id === sel.size}"><b>${esc(s.label)}</b><span class="price">${fmt(s.price)}</span></button>`).join("");
+}
+$("#dSizes").onclick = e => {
+  const b = e.target.closest("[data-size]"); if (!b || b.dataset.size === sel.size) return;
+  sel.size = b.dataset.size; renderSizes(); renderExtras(); updateAdd();
+};
+function renderIngs() {
+  const d = sel.dish, list = d.ingredients;
+  $("#dIngsSec").hidden = !list.length;
+  $("#dIngHint").hidden = !list.some(i => !i.required);
+  $("#dIndic").hidden = !d.inferred;
+  $("#dIngs").innerHTML = list.map(i => {
+    const on = !sel.removed.has(i.id);
+    return `<button class="ing" type="button" data-ing="${esc(i.id)}" aria-pressed="${on}" ${i.required ? "disabled" : ""}><span class="dot">${i.required ? "•" : on ? "✓" : "✕"}</span><span class="label">${esc(i.name.charAt(0).toUpperCase() + i.name.slice(1))}</span></button>`;
+  }).join("");
+}
+$("#dIngs").onclick = e => {
+  const b = e.target.closest("[data-ing]"); if (!b || b.disabled) return;
+  const id = b.dataset.ing; sel.removed.has(id) ? sel.removed.delete(id) : sel.removed.add(id);
+  if (!sel.dish.ingredients.some(i => !sel.removed.has(i.id))) { sel.removed.delete(id); toast("Gardez au moins un ingrédient"); return; }
+  renderIngs();
+};
+function renderExtras() {
+  const ex = sel.dish.extras || [], sid = sizeOf(sel.dish, sel.size).id;
+  $("#dExtrasSec").hidden = !ex.length;
+  $("#dExtras").innerHTML = ex.map(e => `<div class="extra"><div><b>${esc(e.name)}</b><div class="price">+ ${fmt(exPrice(e, sid))}</div></div>
+    <div class="step"><button type="button" data-ex="${esc(e.id)}" data-d="-1" aria-label="Retirer ${esc(e.name)}">−</button><output>${sel.extras[e.id] || 0}</output><button type="button" data-ex="${esc(e.id)}" data-d="1" aria-label="Ajouter ${esc(e.name)}">+</button></div></div>`).join("");
+}
+$("#dExtras").onclick = e => {
+  const b = e.target.closest("[data-ex]"); if (!b) return;
+  const id = b.dataset.ex; sel.extras[id] = Math.max(0, Math.min(3, (sel.extras[id] || 0) + +b.dataset.d));
+  if (!sel.extras[id]) delete sel.extras[id];
+  renderExtras(); updateAdd();
+};
+$("#qMinus").onclick = () => { sel.qty = Math.max(1, sel.qty - 1); $("#qVal").textContent = sel.qty; updateAdd(); };
+$("#qPlus").onclick = () => { sel.qty = Math.min(20, sel.qty + 1); $("#qVal").textContent = sel.qty; updateAdd(); };
+$("#dNote").oninput = e => { sel.note = e.target.value; };
+function updateAdd() { $("#addBtn").textContent = (sel.editing != null ? "Mettre à jour · " : "Ajouter · ") + fmt(priceOf(sel.dish, sel.size, sel.extras) * sel.qty); }
+$("#addBtn").onclick = () => {
+  const item = { id: sel.dish.id, size: sel.size, qty: sel.qty, removed: [...sel.removed], extras: { ...sel.extras }, note: sel.note.trim() };
+  if (sel.editing != null) cart[sel.editing] = item; else cart.push(item);
+  renderCartBar(); hide(); toast(sel.dish.name + " ajouté au panier");
+};
+
+/* panier */
+function modsOf(it) {
+  const d = DISH[it.id], out = [], sid = sizeOf(d, it.size).id;
+  it.removed.forEach(r => { const i = d.ingredients.find(x => x.id === r); if (i) out.push(["minus", "sans " + i.name.toLowerCase()]); });
+  Object.entries(it.extras).forEach(([k, q]) => { const e = (d.extras || []).find(x => x.id === k); if (e) out.push(["add", `+ ${q > 1 ? q + "× " : ""}${e.name.toLowerCase()}`]); });
+  if (it.note) out.push(["", `« ${it.note} »`]);
+  return out;
+}
+const lineTotal = it => priceOf(DISH[it.id], it.size, it.extras) * it.qty;
+const subtotal = () => cart.reduce((s, it) => s + lineTotal(it), 0);
+const order = { mode: "livraison", name: "", phone: "", address: "", note: "" };
+function renderCartBar() {
+  const n = cart.reduce((s, i) => s + i.qty, 0);
+  $("#cartbar").classList.toggle("show", n > 0);
+  $("#cartCount").textContent = n; $("#cartTotal").textContent = fmt(subtotal());
+}
+$("#openCart").onclick = () => { renderCart(); show($("#cartSheet")); };
+function renderCart() {
+  $("#cartFoot").hidden = !cart.length;
+  $("#cartFoot").innerHTML = '<button class="btn block" type="button" id="sendBtn">Envoyer la commande sur WhatsApp</button>';
+  if (!cart.length) { $("#cartBody").innerHTML = '<div class="c-head"><h2 id="cTitle">Votre panier</h2></div><p class="empty">Votre panier est vide.</p>'; return; }
+  const fee = order.mode === "livraison" ? (R.deliveryFee || 0) : 0;
+  $("#cartBody").innerHTML = `
+    <div class="c-head"><h2 id="cTitle">Votre panier</h2></div>
+    ${cart.map((it, i) => { const d = DISH[it.id], img = imgOf(d), m = modsOf(it); return `<div class="line">
+      ${img ? `<img src="${esc(img)}" alt="">` : "<span></span>"}
+      <div class="line-body"><b>${esc(labelOf(d, it.size))}</b><div class="mods">${m.length ? m.map(([c, t]) => `<span class="${c}">${esc(t)}</span>`).join(" · ") : "Recette d'origine"}</div><button type="button" class="tag" data-edit="${i}" style="margin-top:6px;background:none">Modifier</button></div>
+      <div class="line-right"><span class="price">${fmt(lineTotal(it))}</span>
+        <div class="step"><button type="button" data-q="${i}" data-d="-1" aria-label="Moins">−</button><output>${it.qty}</output><button type="button" data-q="${i}" data-d="1" aria-label="Plus">+</button></div></div>
+    </div>`; }).join("")}
+    <div class="totals"><div><span>Sous-total</span><span class="price">${fmt(subtotal())}</span></div>
+      ${fee ? `<div><span>Livraison</span><span class="price">${fmt(fee)}</span></div>` : ""}
+      <div class="grand"><span>Total</span><span class="price">${fmt(subtotal() + fee)}</span></div></div>
+    <div class="form">
+      <div class="seg" role="group" aria-label="Mode"><button type="button" data-mode="livraison" aria-pressed="${order.mode === "livraison"}">Livraison</button><button type="button" data-mode="emporter" aria-pressed="${order.mode === "emporter"}">À emporter</button></div>
+      <div class="field"><label for="oName">Votre nom</label><input id="oName" autocomplete="name" value="${esc(order.name)}" placeholder="Ex. Aya Konan"></div>
+      ${TOKEN ? "" : `<div class="field"><label for="oPhone">Numéro WhatsApp</label><input id="oPhone" inputmode="tel" autocomplete="tel" value="${esc(order.phone)}" placeholder="07 00 00 00 00"></div>`}
+      ${order.mode === "livraison" ? `<div class="field"><label for="oAddr">Adresse de livraison</label><textarea id="oAddr" rows="2" placeholder="Quartier, rue, repère (ex. Zone 4, rue du Dr Blanchard)">${esc(order.address)}</textarea></div>` : ""}
+      <div class="field"><label for="oNote">Note pour le restaurant</label><input id="oNote" value="${esc(order.note)}" placeholder="Facultatif"></div>
+      <div class="err" id="oErr" role="alert"></div>
+    </div>`;
+}
+$("#cartBody").addEventListener("input", e => { const m = { oName: "name", oPhone: "phone", oAddr: "address", oNote: "note" }[e.target.id]; if (m) order[m] = e.target.value; });
+$("#cartBody").addEventListener("click", e => {
+  const q = e.target.closest("[data-q]"), md = e.target.closest("[data-mode]"), ed = e.target.closest("[data-edit]");
+  if (q) { const it = cart[+q.dataset.q]; it.qty += +q.dataset.d; if (it.qty <= 0) cart.splice(+q.dataset.q, 1); renderCart(); renderCartBar(); }
+  if (md) { order.mode = md.dataset.mode; renderCart(); }
+  if (ed) {
+    const i = +ed.dataset.edit, it = cart[i], d = DISH[it.id];
+    hide(); setTimeout(() => openDish(d, { dish: d, size: it.size, removed: new Set(it.removed), extras: { ...it.extras }, qty: it.qty, note: it.note, editing: i }), 400);
+  }
+});
+
+function receiptText(id) {
+  const fee = order.mode === "livraison" ? (R.deliveryFee || 0) : 0, L = [];
+  L.push(`Commande ${id ? "n°" + id + " " : ""}– ${R.name}`, "");
+  cart.forEach(it => { const d = DISH[it.id]; L.push(`${it.qty}× ${labelOf(d, it.size)} — ${fmt(lineTotal(it))}`); const m = modsOf(it).map(x => x[1]); if (m.length) L.push("   " + m.join(", ")); });
+  L.push("", `Sous-total : ${fmt(subtotal())}`); if (fee) L.push(`Livraison : ${fmt(fee)}`); L.push(`Total : ${fmt(subtotal() + fee)}`, "");
+  L.push(`Nom : ${order.name}`); if (order.phone) L.push(`Tél : ${order.phone}`);
+  L.push(order.mode === "livraison" ? `Livraison : ${order.address}` : "À emporter"); if (order.note) L.push(`Note : ${order.note}`);
+  return L.join("\n");
+}
+
+$("#cartFoot").addEventListener("click", e => { if (e.target.closest("#sendBtn")) send(); });
+async function send() {
+  const err = $("#oErr");
+  if (!order.name.trim()) { err.textContent = "Indiquez votre nom pour que le livreur vous trouve."; $("#oName").focus(); return; }
+  if (!TOKEN && order.phone.replace(/\D/g, "").length < 8) { err.textContent = "Indiquez votre numéro WhatsApp pour recevoir la confirmation."; $("#oPhone").focus(); return; }
+  if (order.mode === "livraison" && order.address.trim().length < 4) { err.textContent = "Indiquez l'adresse de livraison (quartier et un repère)."; $("#oAddr").focus(); return; }
+  err.textContent = ""; const btn = $("#sendBtn"); btn.disabled = true; btn.textContent = "Envoi…";
+  if (TOKEN) {
+    try {
+      const res = await fetch("api/order", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ t: TOKEN, ...order, items: cart }) });
+      const j = await res.json(); if (!res.ok) throw new Error(j.error || "Erreur");
+      done(j.id, true);
+    } catch (e) { err.textContent = e.message === "Failed to fetch" ? "Pas de connexion. Vérifiez votre réseau et réessayez." : e.message; btn.disabled = false; btn.textContent = "Envoyer la commande sur WhatsApp"; }
+  } else done(null, false);
+}
+function done(id, sent) {
+  const text = receiptText(id), wa = `https://wa.me/${R.whatsapp}?text=${encodeURIComponent(text)}`;
+  $("#cartFoot").hidden = false;
+  $("#cartBody").innerHTML = `<div class="done"><div class="ok">✓</div>
+    <h2 id="cTitle">${sent ? "Commande envoyée" : "Commande prête"}</h2>
+    <p>${sent ? `Votre commande n°${esc(id)} est partie en cuisine. Vous recevez la confirmation et le suivi sur WhatsApp.` : "Voici le récapitulatif qui sera envoyé au restaurant sur WhatsApp."}</p>
+    <div class="receipt">${esc(text)}</div>
+    ${sent ? "" : `<p class="demo">Démo : sans lien WhatsApp personnel, la commande s'ouvre dans WhatsApp avec ce message pré-rempli vers le numéro de démonstration (${esc(R.whatsapp)}).</p>`}</div>`;
+  $("#cartFoot").innerHTML = `<a class="btn block" href="${sent ? `https://wa.me/${R.whatsapp}` : wa}" target="_blank" rel="noopener">${sent ? "Retour à WhatsApp" : "Ouvrir dans WhatsApp"}</a>`;
+  if (sent) { cart.length = 0; renderCartBar(); }
+}
+
+let tt; function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 1800); }
+
+if (R.source) $("#footNote").textContent += ` Prix en F CFA, ${R.source}.`;
+renderCats(); renderGrid(); showPromo(); renderCartBar();
+})();
+</script>
